@@ -203,6 +203,12 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 	struct shps_device *sdev;
 	int status, i;
 
+	/*
+	 * The MSHW0153 device is also present on the Surface Laptop 3,
+	 * however that doesn't have a hot-pluggable PCIe device. It also
+	 * doesn't have any GPIO interrupts/pins under the MSHW0153, so filter
+	 * it out here.
+	 */
 	if (gpiod_count(&pdev->dev, NULL) < 0)
 		return -ENODEV;
 
