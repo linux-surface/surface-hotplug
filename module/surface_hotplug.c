@@ -162,7 +162,11 @@ static int shps_setup_irq(struct platform_device *pdev, enum shps_irq_type type)
 	sdev->gpio[type] = NULL;
 	sdev->irq[type] = SHPS_IRQ_NOT_PRESENT;
 
-	/* Only set up interrupts that we actually need. */
+	/*
+	 * Only set up interrupts that we actually need: The Surface Book 3
+	 * does not have a DSM for base presence, so don't set up an interrupt
+	 * for that.
+	 */
 	if (!acpi_check_dsm(handle, &shps_dsm_guid, SHPS_DSM_REVISION, BIT(dsm))) {
 		dev_dbg(&pdev->dev, "IRQ notification via DSM not present (irq=%d)\n",
 			type);
