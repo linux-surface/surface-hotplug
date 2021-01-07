@@ -1,7 +1,7 @@
-From 1c02106742ea4d7f211e475a30d14238becb716d Mon Sep 17 00:00:00 2001
+From 156023305abb29d5c86fd6b344ee2153fc9b071b Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Sat, 31 Oct 2020 20:46:33 +0100
-Subject: [PATCH 3/3] PCI: Add sysfs attribute for PCI device power state
+Subject: [PATCH 2/2] PCI: Add sysfs attribute for PCI device power state
 
 While most PCI power-states can be queried from user-space via lspci,
 this has some limits. Specifically, lspci fails to provide an accurate
@@ -68,5 +68,5 @@ index d15c881e2e7e..b15f754e6346 100644
  	&dev_attr_vendor.attr,
  	&dev_attr_device.attr,
 -- 
-2.29.2
+2.30.0
 
