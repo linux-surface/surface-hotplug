@@ -120,7 +120,9 @@ static void shps_dsm_notify_irq(struct platform_device *pdev, enum shps_irq_type
 	}
 
 	mutex_unlock(&sdev->lock[type]);
-	ACPI_FREE(result);
+
+	if (result)
+		ACPI_FREE(result);
 }
 
 static irqreturn_t shps_handle_irq(int irq, void *data)
