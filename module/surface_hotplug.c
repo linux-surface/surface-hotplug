@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Surface Book (gen. 2 and later) hot-plug driver.
+ * Surface Book (2 and later) hot-plug driver.
  *
  * Surface Book devices (can) have a hot-pluggable discrete GPU (dGPU). This
  * driver is responsible for out-of-band hot-plug event signaling on these
@@ -10,7 +10,7 @@
  * Event signaling is handled via ACPI, which will generate the appropriate
  * device-check notifications to be picked up by the PCIe hot-plug driver.
  *
- * Copyright (C) 2019-2020 Maximilian Luz <luzmaximilian@gmail.com>
+ * Copyright (C) 2019-2021 Maximilian Luz <luzmaximilian@gmail.com>
  */
 
 #include <linux/acpi.h>
