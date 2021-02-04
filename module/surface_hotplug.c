@@ -148,10 +148,6 @@ static int shps_setup_irq(struct platform_device *pdev, enum shps_irq_type type)
 	const int dsm = SHPS_DSM_FN_IRQ_BASE_PRESENCE + type;
 	int status, irq;
 
-	/* Initialize as "not present". */
-	sdev->gpio[type] = NULL;
-	sdev->irq[type] = SHPS_IRQ_NOT_PRESENT;
-
 	/*
 	 * Only set up interrupts that we actually need: The Surface Book 3
 	 * does not have a DSM for base presence, so don't set up an interrupt
@@ -231,8 +227,10 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 	 * Initialize IRQs so that we can safely call surface_hotplug_remove()
 	 * on errors.
 	 */
-	for (i = 0; i < SHPS_NUM_IRQS; i++)
+	for (i = 0; i < SHPS_NUM_IRQS; i++) {
 		sdev->irq[i] = SHPS_IRQ_NOT_PRESENT;
+		sdev->gpio[i] = NULL;
+	}
 
 	/* Set up IRQs. */
 	for (i = 0; i < SHPS_NUM_IRQS; i++) {
