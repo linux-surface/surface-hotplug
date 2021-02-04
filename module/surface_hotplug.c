@@ -100,14 +100,10 @@ static void shps_dsm_notify_irq(struct platform_device *pdev, enum shps_irq_type
 				   SHPS_DSM_FN_IRQ_BASE_PRESENCE + type, &param);
 
 	if (!result) {
-		mutex_unlock(&sdev->lock[type]);
-		dev_err(&pdev->dev,
-			"IRQ notification via DSM failed (irq=%d, gpio=%d)\n",
+		dev_err(&pdev->dev, "IRQ notification via DSM failed (irq=%d, gpio=%d)\n",
 			type, value);
-		return;
-	}
 
-	if (result->type != ACPI_TYPE_BUFFER) {
+	} else if (result->type != ACPI_TYPE_BUFFER) {
 		dev_err(&pdev->dev,
 			"IRQ notification via DSM failed: unexpected result type (irq=%d, gpio=%d)\n",
 			type, value);
