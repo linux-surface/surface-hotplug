@@ -40,8 +40,7 @@ static const struct acpi_gpio_mapping shps_acpi_gpios[] = {
 
 /* 5515a847-ed55-4b27-8352-cd320e10360a */
 static const guid_t shps_dsm_guid =
-	GUID_INIT(0x5515a847, 0xed55, 0x4b27, 0x83, 0x52, 0xcd,
-		  0x32, 0x0e, 0x10, 0x36, 0x0a);
+	GUID_INIT(0x5515a847, 0xed55, 0x4b27, 0x83, 0x52, 0xcd, 0x32, 0x0e, 0x10, 0x36, 0x0a);
 
 #define SHPS_DSM_REVISION		1
 
@@ -54,11 +53,10 @@ enum shps_dsm_fn {
 };
 
 enum shps_irq_type {
-	/* NOTE: Must be in order of DSM function */
+	/* NOTE: Must be in order of enum shps_dsm_fn. */
 	SHPS_IRQ_TYPE_BASE_PRESENCE	= 0,
 	SHPS_IRQ_TYPE_DEVICE_POWER	= 1,
 	SHPS_IRQ_TYPE_DEVICE_PRESENCE	= 2,
-
 	SHPS_NUM_IRQS,
 };
 
@@ -69,15 +67,14 @@ static const char *const shps_gpio_names[] = {
 };
 
 struct shps_device {
-	struct mutex lock[SHPS_NUM_IRQS];
+	struct mutex lock[SHPS_NUM_IRQS];  /* Protects update in shps_dsm_notify_irq() */
 	struct gpio_desc *gpio[SHPS_NUM_IRQS];
 	unsigned int irq[SHPS_NUM_IRQS];
 };
 
 #define SHPS_IRQ_NOT_PRESENT		((unsigned int)-1)
 
-static void shps_dsm_notify_irq(struct platform_device *pdev,
-				enum shps_irq_type type)
+static void shps_dsm_notify_irq(struct platform_device *pdev, enum shps_irq_type type)
 {
 	struct shps_device *sdev = platform_get_drvdata(pdev);
 	acpi_handle handle = ACPI_HANDLE(&pdev->dev);
@@ -90,13 +87,11 @@ static void shps_dsm_notify_irq(struct platform_device *pdev,
 	value = gpiod_get_value_cansleep(sdev->gpio[type]);
 	if (value < 0) {
 		mutex_unlock(&sdev->lock[type]);
-		dev_err(&pdev->dev, "failed to get gpio: %d (irq=%d)\n",
-			type, value);
+		dev_err(&pdev->dev, "failed to get gpio: %d (irq=%d)\n", type, value);
 		return;
 	}
 
-	dev_dbg(&pdev->dev, "IRQ notification via DSM (irq=%d, value=%d)\n",
-		type, value);
+	dev_dbg(&pdev->dev, "IRQ notification via DSM (irq=%d, value=%d)\n", type, value);
 
 	param.type = ACPI_TYPE_INTEGER;
 	param.integer.value = value;
@@ -168,8 +163,7 @@ static int shps_setup_irq(struct platform_device *pdev, enum shps_irq_type type)
 	 * for that.
 	 */
 	if (!acpi_check_dsm(handle, &shps_dsm_guid, SHPS_DSM_REVISION, BIT(dsm))) {
-		dev_dbg(&pdev->dev, "IRQ notification via DSM not present (irq=%d)\n",
-			type);
+		dev_dbg(&pdev->dev, "IRQ notification via DSM not present (irq=%d)\n", type);
 		return 0;
 	}
 
@@ -228,8 +222,7 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 
 		status = shps_setup_irq(pdev, i);
 		if (status) {
-			dev_err(&pdev->dev, "failed to set up IRQ %d: %d\n",
-				i, status);
+			dev_err(&pdev->dev, "failed to set up IRQ %d: %d\n", i, status);
 			return status;
 		}
 	}
