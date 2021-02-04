@@ -192,6 +192,22 @@ static int shps_setup_irq(struct platform_device *pdev, enum shps_irq_type type)
 	return 0;
 }
 
+static int surface_hotplug_remove(struct platform_device *pdev)
+{
+	struct shps_device *sdev = platform_get_drvdata(pdev);
+	int i;
+
+	/* Ensure that IRQs have been fully handled and won't trigger any more. */
+	for (i = 0; i < SHPS_NUM_IRQS; i++) {
+		if (sdev->irq[i] != SHPS_IRQ_NOT_PRESENT)
+			disable_irq(sdev->irq[i]);
+
+		mutex_destroy(&sdev->lock[i]);
+	}
+
+	return 0;
+}
+
 static int surface_hotplug_probe(struct platform_device *pdev)
 {
 	struct shps_device *sdev;
@@ -216,6 +232,13 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, sdev);
 
+	/*
+	 * Initialize IRQs so that we can safely call surface_hotplug_remove()
+	 * on errors.
+	 */
+	for (i = 0; i < SHPS_NUM_IRQS; i++)
+		sdev->irq[i] = SHPS_IRQ_NOT_PRESENT;
+
 	/* Set up IRQs. */
 	for (i = 0; i < SHPS_NUM_IRQS; i++) {
 		mutex_init(&sdev->lock[i]);
@@ -223,7 +246,7 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 		status = shps_setup_irq(pdev, i);
 		if (status) {
 			dev_err(&pdev->dev, "failed to set up IRQ %d: %d\n", i, status);
-			return status;
+			goto err;
 		}
 	}
 
@@ -233,19 +256,10 @@ static int surface_hotplug_probe(struct platform_device *pdev)
 			shps_dsm_notify_irq(pdev, i);
 
 	return 0;
-}
 
-static int surface_hotplug_remove(struct platform_device *pdev)
-{
-	struct shps_device *sdev = platform_get_drvdata(pdev);
-	int i;
-
-	/* Ensure that IRQs have been fully handled and won't trigger any more. */
-	for (i = 0; i < SHPS_NUM_IRQS; i++)
-		if (sdev->irq[i] != SHPS_IRQ_NOT_PRESENT)
-			disable_irq(sdev->irq[i]);
-
-	return 0;
+err:
+	surface_hotplug_remove(pdev);
+	return status;
 }
 
 static const struct acpi_device_id surface_hotplug_acpi_match[] = {
