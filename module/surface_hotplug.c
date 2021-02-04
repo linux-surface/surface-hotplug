@@ -111,9 +111,8 @@ static void shps_dsm_notify_irq(struct platform_device *pdev, enum shps_irq_type
 		dev_err(&pdev->dev,
 			"IRQ notification via DSM failed: unexpected result type (irq=%d, gpio=%d)\n",
 			type, value);
-	}
 
-	if (result->buffer.length != 1 || result->buffer.pointer[0] != 0) {
+	} else if (result->buffer.length != 1 || result->buffer.pointer[0] != 0) {
 		dev_err(&pdev->dev,
 			"IRQ notification via DSM failed: unexpected result value (irq=%d, gpio=%d)\n",
 			type, value);
