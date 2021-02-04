@@ -74,7 +74,7 @@ struct shps_device {
 
 #define SHPS_IRQ_NOT_PRESENT		((unsigned int)-1)
 
-static enum shps_dsm_fn shps_dsm_fn_irq(enum shps_irq_type type)
+static enum shps_dsm_fn shps_dsm_fn_for_irq(enum shps_irq_type type)
 {
 	return SHPS_DSM_FN_IRQ_BASE_PRESENCE + type;
 }
@@ -102,7 +102,7 @@ static void shps_dsm_notify_irq(struct platform_device *pdev, enum shps_irq_type
 	param.integer.value = value;
 
 	result = acpi_evaluate_dsm(handle, &shps_dsm_guid, SHPS_DSM_REVISION,
-				   shps_dsm_fn_irq(type), &param);
+				   shps_dsm_fn_for_irq(type), &param);
 
 	if (!result) {
 		dev_err(&pdev->dev, "IRQ notification via DSM failed (irq=%d, gpio=%d)\n",
@@ -152,7 +152,7 @@ static int shps_setup_irq(struct platform_device *pdev, enum shps_irq_type type)
 	struct gpio_desc *gpiod;
 	acpi_handle handle = ACPI_HANDLE(&pdev->dev);
 	const char *irq_name;
-	const int dsm = shps_dsm_fn_irq(type);
+	const int dsm = shps_dsm_fn_for_irq(type);
 	int status, irq;
 
 	/*
